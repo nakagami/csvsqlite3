@@ -36,14 +36,10 @@ a,b,c
 A,B,C
 """))
         cur = conn.cursor()
-        cur.execute('ccc,aaa')
+        cur.execute('select ccc,aaa from csv')
         self.assertEqual(
             [d[0] for d in cur.description],
             ['ccc', 'aaa']
-        )
-        self.assertEqual(
-            [d[6] for d in cur.description],
-            [True, False]
         )
         self.assertEqual(
             cur.fetchall(),
@@ -61,10 +57,10 @@ A,
 x
 """))
         cur = conn.cursor()
-        cur.execute('aaa,bbb,ccc')
+        cur.execute('select * from csv')
         self.assertEqual(
             cur.fetchall(),
-            [('1','2', ''),('a','', 'c'),('A','', None),('','', None),('x', None, None)]
+            [('1','2', ''),('a','', 'c'),('A','', None),('','', None),(None, None, None),('x', None, None)]
         )
 
 if __name__ == "__main__":

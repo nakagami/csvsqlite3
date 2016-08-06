@@ -50,7 +50,6 @@ def connect(path, encoding='utf-8', delimiter=',', tabname='csv'):
     sql = "INSERT INTO %s VALUES (%s)" % (tabname, ','.join('?' * len(colnames)))
     for param in csv.reader(csvio, delimiter=delimiter):
         param.extend([None] * (len(colnames) - len(param)))
-        print(param)
         cur.execute(sql, param)
     conn.commit()
 
