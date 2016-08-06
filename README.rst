@@ -25,7 +25,7 @@ Example
 ::
 
    import csvsqlite3
-   conn = minitds.connect('/foo/bar/baz.csv')
+   conn = csvsqlite3.connect('/foo/bar/baz.csv')
    cur = conn.cursor()
    cur.execute('select * from csv')
    for r in cur.fetchall():
