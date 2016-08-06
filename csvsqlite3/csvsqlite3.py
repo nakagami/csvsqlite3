@@ -40,7 +40,7 @@ def connect(path, encoding='utf-8', delimiter=',', tabname='csv'):
     else:
         csvio = open(path, 'r', encoding=encoding)
 
-    cols = [r.strip() for r in csvio.readline().strip().split(',')]
+    cols = [r.strip() for r in csvio.readline().strip().split(delimiter)]
 
     conn = sqlite3.connect(':memory:')
     cur = conn.cursor()
