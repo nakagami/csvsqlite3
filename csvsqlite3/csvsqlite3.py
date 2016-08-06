@@ -24,6 +24,7 @@
 # https://github.com/nakagami/csvsqlite3/
 import io
 import csv
+import sqlite3
 
 VERSION = (0, 1, 0)
 __version__ = '%s.%s.%s' % VERSION
@@ -33,106 +34,25 @@ class Error(Exception):
     pass
 
 
-class Cursor(object):
-    def __init__(self, conn):
-        self.conn = conn
-        self._fieldnames = []
-        self._reader = None
+def connect(path, encoding='utf-8', delimiter=',', tabname='csv'):
+    if isinstance(path, io.StringIO):
+        csvio = path
+    else:
+        csvio = open(path, 'r', encoding=encoding)
 
-    def __enter__(self):
-        return self
+    colnames = csvio.readline().strip().split(',')
 
-    def __exit__(self, exc, value, traceback):
-        self.close()
+    conn = sqlite3.connect(':memory:')
+    cur = conn.cursor()
+    sql = "CREATE TABLE %s (%s)" % (tabname, ','.join(colnames))
+    cur.execute(sql)
 
-    def callproc(self, procname, args=()):
-        raise NotSupportedError()
+    sql = "INSERT INTO %s VALUES (%s)" % (tabname, ','.join('?' * len(colnames)))
+    for param in csv.reader(csvio, delimiter=delimiter):
+        param.extend([None] * (len(colnames) - len(param)))
+        print(param)
+        cur.execute(sql, param)
+    conn.commit()
 
-    def nextset(self, procname, args=()):
-        raise NotSupportedError()
+    return conn
 
-    def setinputsizes(sizes):
-        pass
-
-    def setoutputsize(size, column=None):
-        pass
-
-    def execute(self, query):
-        self._fieldnames = query.split(',')
-        if isinstance(self.conn._path, io.StringIO):
-            self._stringio = self.conn._path
-        else:
-            self._stringio = open(self.conn._path, 'r', encoding=self.conn._encoding)
-        self._header = self._stringio.readline().strip().split(',')
-        self._reader = csv.DictReader(
-            self._stringio,
-            fieldnames=self._header,
-            delimiter=self.conn._delimiter,
-        )
-
-    @property
-    def description(self):
-        return [(name, -1, -1, -1, -1, -1, name != self._header[0]) for name in self._fieldnames]
-
-    def _fetchone(self):
-        if self._reader is None:
-            raise Error("Not call execute().")
-        r = next(self._reader)
-        return tuple([r.get(f) for f in self._fieldnames])
-
-    def fetchone(self):
-        try:
-            return self._fetchone()
-        except StopIteration:
-            return None
-
-    def fetchmany(self, size=1):
-        rs = []
-        for i in range(size):
-            r = self.fetchone()
-            if not r:
-                break
-            rs.append(r)
-        return rs
-
-    def fetchall(self):
-        return list(self)
-
-    def close(self):
-        self._stringio.close()
-        self._reader = None
-
-    @property
-    def rowcount(self):
-        raise NotSupportedError()
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        r = self._fetchone()
-        if not r:
-            raise StopIteration()
-        return r
-
-
-class Connection(object):
-    def __init__(self, path, encoding='utf-8', delimiter=','):
-        self._path = path
-        self._encoding = encoding
-        self._delimiter = delimiter
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc, value, traceback):
-        self.close()
-
-    def cursor(self):
-        return Cursor(self)
-
-    def close(self):
-        pass
-
-def connect(path, encoding='utf-8', delimiter=','):
-    return Connection(path, encoding, delimiter)
