@@ -30,10 +30,6 @@ VERSION = (0, 1, 0)
 __version__ = '%s.%s.%s' % VERSION
 apilevel = '2.0'
 
-class Error(Exception):
-    pass
-
-
 def connect(path, encoding='utf-8', delimiter=',', tabname='csv'):
     if isinstance(path, io.StringIO):
         csvio = path
