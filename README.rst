@@ -4,6 +4,8 @@ csvsqlite3
 
 Csv reader like PEP 249 API.
 
+https://github.com/harelba/q inspired
+
 Requirements
 -----------------
 
