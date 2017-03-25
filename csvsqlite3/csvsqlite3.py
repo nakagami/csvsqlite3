@@ -26,7 +26,7 @@ import io
 import csv
 import sqlite3
 
-VERSION = (0, 1, 0)
+VERSION = (0, 1, 1)
 __version__ = '%s.%s.%s' % VERSION
 apilevel = '2.0'
 
